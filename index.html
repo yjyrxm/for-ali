@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Ali</title>
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --light-blue: #e3f2fd;
+            --dark-blue: #0056b3;
+            --gray-border: #bbbbbb;
+        }
+
+        /* Standard Bold Blue Theme */
+        * { box-sizing: border-box; font-family: 'Arial', sans-serif; color: var(--primary-blue); font-weight: bold; }
+        body, html { margin: 0; padding: 0; height: 100%; background-color: var(--light-blue); overflow-x: hidden; }
+
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: url('https://pin.it/1BhBnQ0vm') no-repeat center center;
+            background-size: cover; filter: blur(15px); opacity: 0.3;
+        }
+
+        .page {
+            display: none; min-height: 100vh; width: 100%;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; animation: fadeIn 0.5s ease-in;
+        }
+        .active { display: flex; }
+
+        #page3 { justify-content: flex-start; padding-top: 50px; overflow-y: auto; }
+
+        .glass-box {
+            background-color: var(--light-blue);
+            border: 3px solid var(--gray-border);
+            border-radius: 20px; padding: 35px;
+            max-width: 500px; width: 95%; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-box:hover { transform: scale(1.08); }
+
+        .title-huge { font-size: 2.8rem; margin-bottom: 15px; }
+        .title-reasons { font-size: 2.0rem; margin-bottom: 15px; }
+
+        .btn {
+            background-color: var(--primary-blue); color: white;
+            border: none; padding: 15px 35px; border-radius: 40px;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 20px;
+            z-index: 110; 
+        }
+        .btn:hover { transform: scale(1.1); background-color: var(--dark-blue); }
+
+        /* Flipping Tile Transition (5 columns for 20 tiles) */
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px auto; max-width: 300px; }
+        .tile { width: 50px; height: 50px; perspective: 1000px; cursor: pointer; }
+        .tile-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .tile.flipped .tile-inner { transform: rotateY(180deg); }
+        .tile-front, .tile-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tile-front { background-color: var(--primary-blue); border: 1px solid var(--gray-border); }
+        .tile-back { background-color: white; transform: rotateY(180deg); border: 1px solid var(--primary-blue); }
+
+        .reason-item {
+            background: white; border: 2px solid var(--gray-border);
+            margin: 8px 0; padding: 12px; border-radius: 12px;
+            cursor: pointer; text-align: left; transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        .reason-item:hover { transform: scale(1.05); border-color: var(--primary-blue); }
+        .reason-item.viewed { background: #d0e7ff; }
+
+        /* Envelope */
+        .env-wrapper { 
+            position: relative; 
+            width: 400px; height: 260px; 
+            perspective: 1200px; cursor: pointer;
+            animation: floatUpDown 3s ease-in-out infinite; 
+            margin-top: 80px; 
+        }
+        .envelope {
+            position: absolute; width: 100%; height: 100%;
+            background: var(--primary-blue); border-radius: 0 0 15px 15px; z-index: 2;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+        }
+        .flap {
+            position: absolute; top: 0; width: 100%; height: 100%;
+            background: var(--dark-blue); clip-path: polygon(0 0, 50% 65%, 100% 0);
+            transform-origin: top; transition: transform 0.4s; z-index: 3;
+        }
+        .env-wrapper.open .flap { transform: rotateX(180deg); }
+
+        .full-letter-container {
+            display: none; position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%);
+            flex-direction: column; align-items: center; width: 100%;
+            z-index: 100;
+        }
+
+        .letter-content {
+            width: 550px; max-width: 95vw; height: 85vh; background: #ffffff;
+            border: 5px solid var(--primary-blue); border-radius: 20px;
+            padding: 40px 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            overflow-y: auto; text-align: center;
+            animation: slowAppear 0.5s ease-out;
+        }
+
+        .photo-card {
+            position: absolute; width: 100px; height: 130px;
+            background: white; border: 4px solid white;
+            border-radius: 2px; box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateY(-50px) scale(0.5);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10; transform-origin: top center;
+        }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+        .hanging-string { position: absolute; top: -60px; left: 50%; width: 2px; height: 60px; background: #aaa; transform: translateX(-50%); }
+        .bulb { position: absolute; top: -70px; left: 50%; width: 12px; height: 12px; background: #fff; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.8); }
+
+        .light-orb {
+            position: absolute; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.25) 0%, rgba(0, 123, 255, 0) 70%);
+            border-radius: 50%; z-index: 1; filter: blur(60px);
+            animation: pulseLight 8s infinite alternate; pointer-events: none;
+        }
+
+        .heart-particle { position: fixed; color: #add8e6; font-size: 20px; z-index: 5; pointer-events: none; animation: floatHearts 4s linear infinite; }
+
+        @keyframes floatUpDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+        @keyframes slowAppear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes floatHearts { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulseLight { from { transform: scale(1); opacity: 0.4; } to { transform: scale(1.3); opacity: 0.6; } }
+        @keyframes swing { 0%, 100% { transform: rotate(var(--rot)); } 50% { transform: rotate(calc(var(--rot) + 6deg)); } }
+
+        @media (max-width: 480px) {
+            .env-wrapper { width: 320px; height: 220px; margin-top: 60px; }
+            .letter-content { width: 95%; height: 80vh; padding: 25px 15px; }
+            .photo-card { width: 85px; height: 110px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-overlay"></div>
+
+    <div id="page1" class="page active">
+        <div class="glass-box">
+            <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGplZ3dqdzI5ZzR2Y2o4Nnl2enRqb2pxNmdiNTd4eHpwOTk5OGZ5cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cd0cUsW1WY5EozBXLM/giphy.gif" alt="GIF" style="width:120px; margin-bottom:15px;">
+            <div class="title-huge">Hi, handsome Ali</div>
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">I made this for you because a special person deserves a special surprise.</div>
+            <div style="font-size: 0.9rem; color: black;">But first, let's play a game to unlock your surprises.</div>
+            <button class="btn" onclick="nextPage(2)">start game &rarr;</button>
+        </div>
+    </div>
+
+    <div id="page2" class="page">
+        <div class="glass-box">
+            <div class="title-huge">Let's play a game!</div>
+            <div style="font-size: 1rem;">Find the tiles that match. Hope you enjoy, Ali</div>
+            <div class="grid" id="gameGrid"></div>
+            <div id="gameSuccess" style="display:none;">
+                <p style="font-size: 1.2rem;">yiee, you completed the task!</p>
+                <button class="btn" onclick="nextPage(3)">unlock your surprises</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page3" class="page">
+        <div class="glass-box">
+            <div class="title-reasons">Reasons why I like you</div>
+            <div style="margin-bottom: 20px;">tap each heart to reveal reasons</div>
+            <div id="reasonsContainer"></div>
+            <div id="reasonsFinal" style="display:none; margin-top:20px; padding-bottom: 40px;">
+                <p>I just wanted you to know that i see you. all of you. and i love every bit of you</p>
+                <button class="btn" onclick="nextPage(4)">open your next surprise</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page4" class="page">
+        <div class="env-wrapper" id="env1" onclick="openLetter(1)">
+            <div class="flap"></div>
+            <div class="envelope"></div>
+            <div style="position:absolute; bottom:40px; width:100%; text-align:center; z-index:1; color:white; font-size: 1.2rem;">OPEN FOR SURPRISE</div>
+        </div>
+        
+        <div id="fullLetter1" class="full-letter-container">
+            <div class="letter-content">
+                <h2 style="font-size: 1.8rem;">Happy Birthday, Ali!</h2>
+                <p style="line-height: 1.8; font-weight: normal; color: #444;">Hi, Ali! Happy birthday to the most handsome man I know. Time really flies. I still can’t believe how far we’ve come since the day we first met—and now here we are, celebrating your day.
+<br><br>
+I want you to know that meeting you was completely unexpected. I never imagined we’d click the way we did, but somehow we did—and it felt so natural. It’s amazing how, in almost four months, what started as dull and awkward conversations slowly turned into something warmer, lighter, and more meaningful. Along the way, you became someone I genuinely care about, value, and feel deeply grateful for.
+<br><br>
+You once told me that life hasn’t always been kind to you—that you felt like you were living in the dark. And as you learned to trust me, you shared the struggles you’ve carried for so long and even let me see your most vulnerable side. Yet despite all the battles you fight quietly, you still make the effort to check on me, to be there for me, and to lift me up. Ali, you brought light and beautiful colors into my world. I admire how you show up for me, especially when I’m at my lowest, without ever asking for anything in return. Your kindness feels pure and sincere. With you, I feel safe, comforted, and honestly, a little surreal (I hope you feel the same with me—hehe).
+<br><br>
+I’m so proud of you for choosing to keep going, for fighting for your dreams, and for facing life one day at a time. I truly thank God for allowing our paths to cross.
+<br><br>
+You know how vocal I am about this—I admire you. I like you. I care about your days, your thoughts, the things you keep to yourself, and even the worries you don’t always say out loud. Please know that you can always find a safe space in me—someone your heart and mind can naturally lean on.
+<br><br>
+On your birthday today, I just want you to remember how special you are to me. You deserve the same patience, care, and warmth that you so freely give to others. I hope today reminds you that you are seen, appreciated, cared for, and loved—even in ways you may not always realize.
+<br><br>
+Thank you for coming into my life, Ali. Thank you for being you. Thank you for the bond we share—the laughs, the tampuhan, the asaran, and the comfort you’ve brought into my world. I hope this year gives you gentler days, healing moments, and countless reasons to smile more.
+<br><br>
+Happy birthday, Alidestan Rhys. 🤍<br>
+(Advance Happy valentines too!)</p>
+            </div>
+            <button class="btn" onclick="nextPage(5)">here's for another surprise</button>
+        </div>
+    </div>
+
+    <div id="page5" class="page">
+        <div class="title-huge" style="text-align:center;">HAPPIEST BIRTHDAY,<br>ALIDESTAN RHYS!!!</div>
+        <div style="font-size: 12rem;">💐</div>
+        <button id="btn5" class="btn" style="display:none;" onclick="nextPage(6)">continue</button>
+    </div>
+
+    <div id="page6" class="page" style="justify-content: flex-start; position: relative;">
+        <div class="light-orb" style="top: 10%; left: 10%;"></div>
+        <div class="light-orb" style="bottom: 10%; right: 10%;"></div>
+        <h2 style="z-index: 20; background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 20px; margin-top: 20px;">MY FAVORITE PHOTOS OF YOU 💙</h2>
+        <div id="photoContainer" style="position: relative; width: 100%; height: 85vh; margin-top: 30px;"></div>
+    </div>
+
+    <script>
+        function nextPage(num) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + num).classList.add('active');
+            if(num === 2) initGame();
+            if(num === 3) initReasons();
+            if(num === 5) setTimeout(() => document.getElementById('btn5').style.display = 'block', 3000);
+            if(num === 6) initPhotos();
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '💙';
+            heart.className = 'heart-particle';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '100vh';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 4000);
+        }
+
+        function openLetter(id) {
+            document.getElementById('env' + id).classList.add('open');
+            setInterval(createHeart, 300);
+            setTimeout(() => {
+                document.getElementById('env' + id).style.display = 'none';
+                document.getElementById('fullLetter' + id).style.display = 'flex';
+            }, 500);
+        }
+
+        function initGame() {
+            // SET BACK TO 10 PAIRS (20 TILES)
+            const icons = ['💙', '💎', '⭐', '✨', '🌊', '🪁', '🧊', '❄️', '🔹', '🧿'];
+            let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            let flipped = [];
+            let matches = 0;
+
+            deck.forEach(icon => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.innerHTML = `<div class="tile-inner"><div class="tile-front"></div><div class="tile-back">${icon}</div></div>`;
+                tile.onclick = () => {
+                    if (flipped.length < 2 && !tile.classList.contains('flipped')) {
+                        tile.classList.add('flipped');
+                        flipped.push(tile);
+                        if (flipped.length === 2) {
+                            if (flipped[0].querySelector('.tile-back').innerText === flipped[1].querySelector('.tile-back').innerText) {
+                                matches++; flipped = [];
+                                if (matches === 10) document.getElementById('gameSuccess').style.display = 'block';
+                            } else {
+                                setTimeout(() => { flipped.forEach(t => t.classList.remove('flipped')); flipped = []; }, 800);
+                            }
+                        }
+                    }
+                };
+                grid.appendChild(tile);
+            });
+        }
+
+        function initReasons() {
+            const reasons = [
+                { t: "your personality", d: "With you, I can be the person I truly am without facade. I can be naughty, funny, gross, classy, knowledgeable and stubborn. You bring so much comfort and happiness in my life, Ali." },
+                { t: "your love to your family", d: "The way how you always stood up for and show your love to your fam (especially to your uncle, auntie, your tita, and your lolo) is something i really respect. You showed me a man you truly are, Ali - loving, caring and kind." },
+                { t: "your tenderness", d: "You're the first person who was gentle to me. You showed me that I can be vulnerable with you without judgment. With you, I feel seen, heard and valued." },
+                { t: "your determination", d: "Even though you face lots of problem right now, you never stop in pursuing the dreams you want to achieve, your dream for yourself and for the people who raised you. I'm proud of you for being brave and dedicated, Ali. The way you pursue your goals inspires me every day." },
+                { t: "your intelligence", d: "I really admire how academically knowledgeable you are, Ali. I may be older than you, but you made me realize that I still have more to learn. Day by day, you thought me things I never knew. I love how intelligent you are. " },
+                { t: "your heart", d: "You always consider and care for other's feelings. You remain kind to people even though the world is cruel to you. You are the kindest and the purest person I know, Ali. Rare to find. I'm so glad I met you." },
+                { t: "your beauty", d: "You are handsome, Ali. yYou're not just beautiful on the outside, but most especially on the inside. If you're happy, it makes me happy too. Always put a smile on your handsome face, Ali. It suits you." }
+            ];
+            const container = document.getElementById('reasonsContainer');
+            container.innerHTML = '';
+            let viewed = 0;
+            reasons.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'reason-item';
+                div.innerHTML = `<div><span>♡</span> ${r.t}</div><div style="display:none; font-weight:normal; margin-top:5px;">${r.d}</div>`;
+                div.onclick = () => {
+                    if (!div.classList.contains('viewed')) {
+                        div.classList.add('viewed');
+                        div.querySelector('span').innerText = '💙';
+                        div.lastChild.style.display = 'block';
+                        viewed++;
+                        if (viewed === reasons.length) document.getElementById('reasonsFinal').style.display = 'block';
+                    }
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function initPhotos() {
+            const container = document.getElementById('photoContainer');
+            const photoUrls = [
+                "Messenger_creation_3ED012C3-1873-4629-A815-082A7D74C7A8.jpeg",
+                "Messenger_creation_B8426FEC-43A7-4E90-A0AD-D4B5C505F541.jpeg",
+                "Messenger_creation_4DA00158-CA3C-41AD-8AB9-3D97A69A83AC.jpeg",
+                "Messenger_creation_7D3BD702-AFF1-4CC1-8730-55C95B9B92E1.jpeg",
+                "Messenger_creation_7D1912D0-D463-4336-A836-93F2A63CD4E0.jpeg",
+                "Messenger_creation_18EFE402-5C76-4A3A-AAFA-1B0E31AC3DF9.jpeg",
+                "Messenger_creation_9989F6F7-956E-4A78-A914-05F4F72776A2.jpeg",
+                "Messenger_creation_213A1A5F-9E45-4FA8-B949-74C19BF11BF2.jpeg",
+                "Messenger_creation_4693E5F6-9D5D-4B7C-8C26-F6F7DFB02F1F.jpeg",
+                "Messenger_creation_9636E233-ECBC-4648-91B8-518E08D315C1.jpeg",
+                "Messenger_creation_428464A3-B334-45AA-9CDF-848A584B4ABF.jpeg",
+                "Messenger_creation_3034279B-9829-4549-90BC-A0E8CAFF4E0C.jpeg",
+                "Gemini_Generated_Image_9vsnf99vsnf99vsn.png"
+            ];
+
+            let positions = [];
+            for(let i=0; i<7; i++) positions.push({ x: i * 14 + 4, y: 15 });
+            for(let i=0; i<6; i++) positions.push({ x: i * 16 + 8, y: 55 });
+            positions.sort(() => Math.random() - 0.5);
+
+            photoUrls.forEach((url, i) => {
+                setTimeout(() => {
+                    const card = document.createElement('div');
+                    card.className = 'photo-card';
+                    const pos = positions[i];
+                    const rot = (Math.random() - 0.5) * 15;
+                    card.style.left = pos.x + '%';
+                    card.style.top = pos.y + '%';
+                    card.style.setProperty('--rot', rot + 'deg');
+                    card.innerHTML = `<div class="bulb"></div><div class="hanging-string"></div><img src="${url}" alt="Memory">`;
+                    container.appendChild(card);
+                    setTimeout(() => {
+                        card.style.opacity = "1";
+                        card.style.transform = `translateY(0) scale(1) rotate(${rot}deg)`;
+                        setTimeout(() => { card.style.animation = `swing ${3 + Math.random()}s infinite ease-in-out`; }, 1000);
+                    }, 50);
+                }, i * 600);
+            });
+        }
+    </script>
+</body>
+</html>
