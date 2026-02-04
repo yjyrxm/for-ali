@@ -53,7 +53,7 @@
         .btn:hover { transform: scale(1.1); background-color: var(--dark-blue); }
 
         /* Flipping Tile Transition (5 columns for 20 tiles) */
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px auto; max-width: 300px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px auto; max-width: 100%; width: fit-content; }
         .tile { width: 50px; height: 50px; perspective: 1000px; cursor: pointer; }
         .tile-inner {
             position: relative; width: 100%; height: 100%;
@@ -141,10 +141,21 @@
         @keyframes pulseLight { from { transform: scale(1); opacity: 0.4; } to { transform: scale(1.3); opacity: 0.6; } }
         @keyframes swing { 0%, 100% { transform: rotate(var(--rot)); } 50% { transform: rotate(calc(var(--rot) + 6deg)); } }
 
+        /* UPDATED RESPONSIVE SECTION */
         @media (max-width: 480px) {
-            .env-wrapper { width: 320px; height: 220px; margin-top: 60px; }
+            .title-huge { font-size: 1.8rem; }
+            .env-wrapper { width: 280px; height: 180px; margin-top: 40px; }
             .letter-content { width: 95%; height: 80vh; padding: 25px 15px; }
-            .photo-card { width: 85px; height: 110px; }
+            
+            /* Center and scale tiles for small screens */
+            .grid { gap: 5px; }
+            .tile { width: 45px; height: 45px; }
+
+            /* Scale down photos and adjust container to prevent overflow */
+            .photo-card { width: 70px; height: 90px; }
+            #photoContainer { height: 75vh; }
+            
+            .glass-box { padding: 20px; }
         }
     </style>
 </head>
@@ -155,7 +166,7 @@
     <div id="page1" class="page active">
         <div class="glass-box">
             <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGplZ3dqdzI5ZzR2Y2o4Nnl2enRqb2pxNmdiNTd4eHpwOTk5OGZ5cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cd0cUsW1WY5EozBXLM/giphy.gif" alt="GIF" style="width:120px; margin-bottom:15px;">
-            <div class="title-huge">Hi, handsome Ali</div>
+            <div class="title-huge">Hi, handsome Ali!</div>
             <div style="font-size: 1.2rem; margin-bottom: 10px;">I made this for you because a special person deserves a special surprise.</div>
             <div style="font-size: 0.9rem; color: black;">But first, let's play a game to unlock your surprises.</div>
             <button class="btn" onclick="nextPage(2)">start game &rarr;</button>
@@ -226,7 +237,7 @@ Happy birthday, Alidestan Rhys. 🤍<br>
     <div id="page6" class="page" style="justify-content: flex-start; position: relative;">
         <div class="light-orb" style="top: 10%; left: 10%;"></div>
         <div class="light-orb" style="bottom: 10%; right: 10%;"></div>
-        <h2 style="z-index: 20; background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 20px; margin-top: 20px;">MY FAVORITE PHOTOS OF YOU 💙</h2>
+        <h2 style="z-index: 20; background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 20px; margin-top: 20px; text-align: center; font-size: 1.2rem;">MY FAVORITE PHOTOS OF YOU 💙</h2>
         <div id="photoContainer" style="position: relative; width: 100%; height: 85vh; margin-top: 30px;"></div>
     </div>
 
@@ -260,7 +271,6 @@ Happy birthday, Alidestan Rhys. 🤍<br>
         }
 
         function initGame() {
-            // SET BACK TO 10 PAIRS (20 TILES)
             const icons = ['💙', '💎', '⭐', '✨', '🌊', '🪁', '🧊', '❄️', '🔹', '🧿'];
             let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
             const grid = document.getElementById('gameGrid');
